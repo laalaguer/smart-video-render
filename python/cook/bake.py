@@ -28,10 +28,14 @@ def filter_adapter(filterobj):
 def trim_filter_adapter(layerobj):
     ''' convert a layer of cake time requirements in to a ffmpeg filter str '''
     return effect.make_filter(
-        effect.preset_filters['setpts'],
-        *['PTS-STARTPTS'],
+        effect.preset_filters['trim'],
         **{'start_frame': layerobj['start'], 'end_frame': layerobj['end']}
     )
+
+
+def setpts_filter_adapter(layerobj):
+    ''' convert a layer of cake to align again into first frame '''
+    return effect.make_filter(effect.preset_filters['setpts'], *['PTS-STARTPTS'])
 
 
 def generate_filtergraph(cake, outputpad):
@@ -47,6 +51,7 @@ def generate_filtergraph(cake, outputpad):
         temp_chain = ''
         temp_str_filters = []
         temp_str_filters.append(trim_filter_adapter(each))
+        temp_str_filters.append(setpts_filter_adapter(each))
         temp_str_filters.extend([filter_adapter(every)
                                  for every in each['filters']])
         temp_chain = chain.get_single_chain(
@@ -54,7 +59,8 @@ def generate_filtergraph(cake, outputpad):
         middle_chains.append(temp_chain)
 
     if len(cake['layers']) == 1:
-        middle_chains.extend(chain.generate_fifo_chain(temp_prefix + str(0), outputpad))
+        # print chain.generate_fifo_chain(temp_prefix + str(0), outputpad)
+        middle_chains.append(chain.generate_fifo_chain(temp_prefix + str(0), outputpad))
         return middle_chains
     else:
         temp_pads = [temp_prefix + str(idx) for idx, each in enumerate(cake['layers'])]
@@ -80,5 +86,18 @@ def generate_full_command_line(cake, result_file_name):
     filtergraph_str = '"%s"' % ';'.join(generate_filtergraph(cake, 'out'))
     sufix = '-map "[out]" %s' % result_file_name
 
+    temp_bucket = [program, input_files_str, method, filtergraph_str, sufix]
+    return ' '.join(temp_bucket)
+
+
+def concat_all_movie_parts(parts, result_file_name):
+    ''' parts are the list of .mp4 file names '''
+    program = 'ffmpeg'
+    input_files_str = ' '.join(['-i %s' % (each) for each in parts])
+    method = '-filter_complex'
+    input_pads = ['[%d]' % a for a in range(len(parts))]
+    input_pads_str = ''.join(input_pads)
+    filtergraph_str = '"' +input_pads_str + 'concat=n=%d' % len(parts) + '[out]' + '"'
+    sufix = '-map "[out]" %s' % result_file_name
     temp_bucket = [program, input_files_str, method, filtergraph_str, sufix]
     return ' '.join(temp_bucket)

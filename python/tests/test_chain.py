@@ -19,3 +19,7 @@ def test_generate_overlay_chains():
     assert '[woman]' not in overlay_chains[1]
     assert '[kids]' in overlay_chains[1]
     assert '[family]' in overlay_chains[-1]
+
+
+def test_generate_fifo_chain():
+    assert chain.generate_fifo_chain('abc', 'bcd') == '[abc]fifo[bcd]'

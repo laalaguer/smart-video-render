@@ -4,6 +4,6 @@
 # Output a filter string, which is a ffmpeg filter
 
 translate_table = {
-    'adjust-crop': {'name': 'crop', 'values': ['iw/2', 'ih', '0', '0'], 'kwvalues': {}},
+    'adjust-crop': {'name': 'crop', 'values': ['iw/2', 'ih', 'iw/2', '0'], 'kwvalues': {}},
     'filter-video': {'name': 'hue', 'values': [], 'kwvalues': {'s': '0'}},
 }

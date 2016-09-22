@@ -1,4 +1,7 @@
 ## Render Video Using Python+FFMPEG
 
-### `./tests`
+### `./tests/`
 All tests. You can use `cd ./tests` then `pytest` to run all the testing cases.
+
+### `./sample`
+Example to convert a fcp.json into ffmpeg command lines

@@ -12,7 +12,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r2",
+              "ref": "WP_20140830_14_39_10_Pro.mp4",
               "duration": "44100/3000s"
             },
             "audio": [
@@ -20,7 +20,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r2",
+                  "ref": "WP_20140830_14_39_10_Pro.mp4",
                   "duration": "10587408/720000s",
                   "role": "dialogue",
                   "srcCh": "1"
@@ -45,7 +45,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r3",
+              "ref": "WP_20140830_15_13_44_Pro.mp4",
               "duration": "20600/3000s"
             },
             "audio": [
@@ -53,7 +53,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r3",
+                  "ref": "WP_20140830_15_13_44_Pro.mp4",
                   "duration": "4967256/720000s",
                   "role": "dialogue",
                   "srcCh": "1"
@@ -78,7 +78,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r2",
+              "ref": "WP_20140830_14_39_10_Pro.mp4",
               "duration": "44100/3000s"
             },
             "audio": [
@@ -86,7 +86,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r2",
+                  "ref": "WP_20140830_14_39_10_Pro.mp4",
                   "duration": "10587408/720000s",
                   "role": "dialogue",
                   "srcCh": "1"
@@ -114,7 +114,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r2",
+              "ref": "WP_20140830_14_39_10_Pro.mp4",
               "duration": "44100/3000s"
             },
             "audio": [
@@ -122,7 +122,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r2",
+                  "ref": "WP_20140830_14_39_10_Pro.mp4",
                   "duration": "10587408/720000s",
                   "role": "dialogue",
                   "srcCh": "1"
@@ -155,7 +155,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r3",
+              "ref": "WP_20140830_15_13_44_Pro.mp4",
               "duration": "20600/3000s"
             },
             "audio": [
@@ -163,7 +163,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r3",
+                  "ref": "WP_20140830_15_13_44_Pro.mp4",
                   "duration": "4967256/720000s",
                   "role": "dialogue",
                   "srcCh": "1"
@@ -191,7 +191,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r2",
+              "ref": "WP_20140830_14_39_10_Pro.mp4",
               "duration": "44100/3000s"
             },
             "audio": [
@@ -199,7 +199,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r2",
+                  "ref": "WP_20140830_14_39_10_Pro.mp4",
                   "duration": "10587408/720000s",
                   "role": "dialogue",
                   "srcCh": "1"
@@ -232,7 +232,7 @@
           "video": {
             "$": {
               "offset": "0s",
-              "ref": "r3",
+              "ref": "WP_20140830_15_13_44_Pro.mp4",
               "duration": "20600/3000s"
             },
             "audio": [
@@ -240,7 +240,7 @@
                 "$": {
                   "lane": "-1",
                   "offset": "0s",
-                  "ref": "r3",
+                  "ref": "WP_20140830_15_13_44_Pro.mp4",
                   "duration": "4967256/720000s",
                   "role": "dialogue",
                   "srcCh": "1"

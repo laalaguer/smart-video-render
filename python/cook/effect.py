@@ -11,6 +11,7 @@ preset_filters = {
     'frame-align': 'setpts=PTS-STARTPTS',
     'overlay': 'overlay',
     'setpts': 'setpts',
+    'trim': 'trim',
 }
 
 
