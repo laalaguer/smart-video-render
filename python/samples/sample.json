@@ -1,252 +1,197 @@
 [
   {
-    "00abc07f6e7d164c505706581d953def": {
-      "$": {
-        "offset": 0,
-        "duration": 74,
-        "end": 74
-      },
+    "d072965954c8755a672a4b65ee46fe3f": {
+      "offset": 0,
+      "duration": 74,
+      "end": 74,
       "clips": [
         {
           "start": 43,
+          "lane": 0,
+          "name": "WP_20140830_14_39_10_Pro",
+          "tcFormat": "NDF",
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_14_39_10_Pro.mp4",
+            "duration": "44100/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_14_39_10_Pro.mp4",
-              "duration": "44100/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_14_39_10_Pro.mp4",
-                  "duration": "10587408/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
+              "duration": "10587408/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
+            }
           }
         }
       ]
     }
   },
   {
-    "34165ddbb9f314b4c60a6f0121d6d498": {
-      "$": {
-        "offset": 74,
-        "duration": 92,
-        "end": 166
-      },
+    "2f90f2f988e22569d919733b03c8e512": {
+      "offset": 74,
+      "duration": 92,
+      "end": 166,
       "clips": [
         {
           "start": 114,
+          "lane": 2,
+          "name": "WP_20140830_15_13_44_Pro",
+          "tcFormat": "NDF",
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_15_13_44_Pro.mp4",
+            "duration": "20600/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_15_13_44_Pro.mp4",
-              "duration": "20600/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_15_13_44_Pro.mp4",
-                  "duration": "4967256/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
+              "duration": "4967256/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
+            }
           }
         }
       ]
     }
   },
   {
-    "4258139f365fc9c4866444078fd1296d": {
-      "$": {
-        "offset": 166,
-        "duration": 163,
-        "end": 329
-      },
+    "85b762071b140aa9e63a79a903d005d5": {
+      "offset": 166,
+      "duration": 163,
+      "end": 329,
       "clips": [
         {
           "start": 209,
+          "lane": 0,
+          "name": "WP_20140830_14_39_10_Pro",
+          "tcFormat": "NDF",
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_14_39_10_Pro.mp4",
+            "duration": "44100/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_14_39_10_Pro.mp4",
-              "duration": "44100/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_14_39_10_Pro.mp4",
-                  "duration": "10587408/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
+              "duration": "10587408/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
+            }
           }
         },
         {
           "start": 52,
-          "adjust-crop": [
-            {
-              "$": {
-                "mode": "trim"
-              },
-              "trim-rect": [
-                {
-                  "$": {
-                    "left": "88.8889"
-                  }
-                }
-              ]
+          "lane": 1,
+          "name": "WP_20140830_14_39_10_Pro",
+          "tcFormat": "NDF",
+          "adjust-crop": {
+            "mode": "trim",
+            "trim-rect": {
+              "left": "88.8889"
             }
-          ],
+          },
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_14_39_10_Pro.mp4",
+            "duration": "44100/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_14_39_10_Pro.mp4",
-              "duration": "44100/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_14_39_10_Pro.mp4",
-                  "duration": "10587408/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
-          },
-          "filter-video": [
-            {
-              "$": {
-                "ref": "r4",
-                "name": "Black & White"
-              }
+              "duration": "10587408/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
             }
-          ]
+          },
+          "filter-video": {
+            "ref": "r4",
+            "name": "Black & White"
+          }
         }
       ]
     }
   },
   {
-    "e845acd29924c64727d715be3fab2c8a": {
-      "$": {
-        "offset": 329,
-        "duration": 143,
-        "end": 472
-      },
+    "02985edfda7aac23efcbad8130dc8fd8": {
+      "offset": 329,
+      "duration": 143,
+      "end": 472,
       "clips": [
         {
           "start": 0,
+          "lane": 0,
+          "name": "WP_20140830_15_13_44_Pro",
+          "tcFormat": "NDF",
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_15_13_44_Pro.mp4",
+            "duration": "20600/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_15_13_44_Pro.mp4",
-              "duration": "20600/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_15_13_44_Pro.mp4",
-                  "duration": "4967256/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
+              "duration": "4967256/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
+            }
           }
         },
         {
           "start": 215,
-          "adjust-crop": [
-            {
-              "$": {
-                "mode": "trim"
-              },
-              "trim-rect": [
-                {
-                  "$": {
-                    "left": "88.8889"
-                  }
-                }
-              ]
+          "lane": 1,
+          "name": "WP_20140830_14_39_10_Pro",
+          "tcFormat": "NDF",
+          "adjust-crop": {
+            "mode": "trim",
+            "trim-rect": {
+              "left": "88.8889"
             }
-          ],
+          },
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_14_39_10_Pro.mp4",
+            "duration": "44100/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_14_39_10_Pro.mp4",
-              "duration": "44100/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_14_39_10_Pro.mp4",
-                  "duration": "10587408/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
-          },
-          "filter-video": [
-            {
-              "$": {
-                "ref": "r4",
-                "name": "Black & White"
-              }
+              "duration": "10587408/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
             }
-          ]
+          },
+          "filter-video": {
+            "ref": "r4",
+            "name": "Black & White"
+          }
         }
       ]
     }
   },
   {
-    "34165ddbb9f314b4c60a6f0121d6d498": {
-      "$": {
-        "offset": 472,
-        "duration": 63,
-        "end": 535
-      },
+    "2f90f2f988e22569d919733b03c8e512": {
+      "offset": 472,
+      "duration": 63,
+      "end": 535,
       "clips": [
         {
           "start": 143,
+          "lane": 0,
+          "name": "WP_20140830_15_13_44_Pro",
+          "tcFormat": "NDF",
           "video": {
-            "$": {
+            "offset": "0s",
+            "ref": "WP_20140830_15_13_44_Pro.mp4",
+            "duration": "20600/3000s",
+            "audio": {
+              "lane": "-1",
               "offset": "0s",
               "ref": "WP_20140830_15_13_44_Pro.mp4",
-              "duration": "20600/3000s"
-            },
-            "audio": [
-              {
-                "$": {
-                  "lane": "-1",
-                  "offset": "0s",
-                  "ref": "WP_20140830_15_13_44_Pro.mp4",
-                  "duration": "4967256/720000s",
-                  "role": "dialogue",
-                  "srcCh": "1"
-                }
-              }
-            ]
+              "duration": "4967256/720000s",
+              "role": "dialogue",
+              "srcCh": "1"
+            }
           }
         }
       ]

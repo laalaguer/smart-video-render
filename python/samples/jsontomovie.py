@@ -10,11 +10,11 @@ def get_single_ffmpeg_cake(fcpcake):
     return a list obj, represents a ffmpeg cake
     '''
     cake_hash = fcpcake.keys()[0]
-    cake_duration = fcpcake[cake_hash]['$']['duration']
+    cake_duration = fcpcake[cake_hash]['duration']
     layers = []
     for each in fcpcake[cake_hash]['clips']:
         layer = {}
-        layer['uid'] = each['video']['$']['ref']
+        layer['uid'] = each['video']['ref']
         layer['start'] = each['start']
         layer['end'] = each['start'] + cake_duration
         layer['filters'] = [translate.translate_table.get(every) for every in each.keys() if 'adjust' in every]
