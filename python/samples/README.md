@@ -9,7 +9,10 @@
 # How to convert fcp xml to ffmpeg commands?
 
 ```
-$ python jsontomovie.py >> testbatch.sh
-$ ./testbatch.sh
+`$ python jsontomovie.py >> testbatch.sh`
 ```
+# How to make a movie?
+`$ ./testbatch.sh`
+
+Note that you shall have some `.mp4` files available for testing.
 

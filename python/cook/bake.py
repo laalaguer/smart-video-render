@@ -90,14 +90,20 @@ def generate_full_command_line(cake, result_file_name):
     return ' '.join(temp_bucket)
 
 
+def generate_concat_files_list(parts, tempfilelistname):
+    ''' parts are the file names with .mp4 you want to concat together '''
+    with open(tempfilelistname, 'w') as f:
+        for each in parts:
+            f.write("file '%s'" % each)
+            f.write('\n')
+
+
 def concat_all_movie_parts(parts, result_file_name):
     ''' parts are the list of .mp4 file names '''
-    program = 'ffmpeg'
-    input_files_str = ' '.join(['-i %s' % (each) for each in parts])
-    method = '-filter_complex'
-    input_pads = ['[%d]' % a for a in range(len(parts))]
-    input_pads_str = ''.join(input_pads)
-    filtergraph_str = '"' +input_pads_str + 'concat=n=%d' % len(parts) + '[out]' + '"'
-    sufix = '-map "[out]" %s' % result_file_name
-    temp_bucket = [program, input_files_str, method, filtergraph_str, sufix]
+    program = 'ffmpeg -f concat'
+    tempfilelistname = 'tempfilelist.txt'
+    generate_concat_files_list(parts, tempfilelistname)
+    input_area = '-i %s' % tempfilelistname
+    method = '-c copy %s' % result_file_name
+    temp_bucket = [program, input_area, method]
     return ' '.join(temp_bucket)
