@@ -29,11 +29,25 @@ with open('sample.json', 'r') as f:
     jsonobj = json.loads(json_string)
 
     fcpjson = jsonobj
-    movie_parts = []
+    movie_parts = []  # container of temp generated movie file names
+    render_commands = []  # command line to execute one by one finally
     for idx, each_cake in enumerate(fcpjson):
         output_file_name = 'test-part-%d.mp4' % idx
         ffmpeg_cake = get_single_ffmpeg_cake(each_cake)
-        print bake.generate_full_command_line(ffmpeg_cake, output_file_name)
+        render_commands.append(bake.generate_full_command_line(ffmpeg_cake, output_file_name))
         movie_parts.append(output_file_name)
 
-    print bake.concat_all_movie_parts(movie_parts, 'mixslice_movie.mp4')
+    render_commands.append(bake.concat_all_movie_parts(movie_parts, 'mixslice_movie.mp4'))
+
+
+import subprocess
+for each in render_commands[0:-1]:
+    print each
+    print '-----------------'
+    subprocess.call(each, shell=True)
+
+commandline = []
+commandline.append('/bin/bash')
+commandline.append('-c')
+commandline.append(render_commands[-1])
+subprocess.Popen(commandline)

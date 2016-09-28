@@ -84,26 +84,24 @@ def generate_full_command_line(cake, result_file_name):
     input_files_str = ' '.join(input_files)
     method = '-filter_complex'
     filtergraph_str = '"%s"' % ';'.join(generate_filtergraph(cake, 'out'))
+    output_format = '-codec:v libx264 -crf 18 -preset slow'
     sufix = '-map "[out]" %s' % result_file_name
 
-    temp_bucket = [program, input_files_str, method, filtergraph_str, sufix]
+    temp_bucket = [program, input_files_str, method, filtergraph_str, output_format, sufix]
     return ' '.join(temp_bucket)
 
 
-def generate_concat_files_list(parts, tempfilelistname):
-    ''' parts are the file names with .mp4 you want to concat together '''
-    with open(tempfilelistname, 'w') as f:
-        for each in parts:
-            f.write("file '%s'" % each)
-            f.write('\n')
+def generate_concat_files_list_str(parts):
+    ''' parts are the file names with .mp4 you want to concat together
+    '''
+    inputs = ' '.join(parts)
+    return "-safe 0 -i <(printf \"file '$PWD/%s'\\n\" " + inputs + ")"
 
 
 def concat_all_movie_parts(parts, result_file_name):
     ''' parts are the list of .mp4 file names '''
     program = 'ffmpeg -f concat'
-    tempfilelistname = 'tempfilelist.txt'
-    generate_concat_files_list(parts, tempfilelistname)
-    input_area = '-i %s' % tempfilelistname
+    input_area = generate_concat_files_list_str(parts)
     method = '-c copy %s' % result_file_name
     temp_bucket = [program, input_area, method]
     return ' '.join(temp_bucket)
