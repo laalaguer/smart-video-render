@@ -1,11 +1,11 @@
 # Bake a Cake into an acutal Movie Clip mp4
 # cake = {
 #     'layers': [layer, layer, layer], -- > the left side is the bottom, the right side is the upper
-#     'uid': xxx - - > hash id of the cake
+#     'uid': xxx ---> xxx-rangestart-rangeend --> hash id and range of the cake
 # }
 #
 # layer = {
-#   'uid':'resource file name',
+#   'resource':'resource file name',
 #   'start': 'start frame',
 #   'end': 'end frame',
 #   'filters': [
@@ -74,10 +74,10 @@ def get_input_files(cake):
     ''' helper function: get input files from cake
     return real file names on the hard disk (linux style)
     '''
-    return [each['uid'] for each in cake['layers']]
+    return [each['resource'] for each in cake['layers']]
 
 
-def generate_full_command_line(cake, result_file_name):
+def generate_single_render_command_line(cake, result_file_name):
     ''' Generate a full command line to ensure a render process'''
     program = 'ffmpeg'
     input_files = ['-i %s' % (each) for each in get_input_files(cake)]
@@ -91,17 +91,17 @@ def generate_full_command_line(cake, result_file_name):
     return ' '.join(temp_bucket)
 
 
-def generate_concat_files_list_str(parts):
+def _generate_concat_files_list_option(parts):
     ''' parts are the file names with .mp4 you want to concat together
     '''
     inputs = ' '.join(parts)
     return "-safe 0 -i <(printf \"file '$PWD/%s'\\n\" " + inputs + ")"
 
 
-def concat_all_movie_parts(parts, result_file_name):
+def generate_concat_command_line(parts, result_file_name):
     ''' parts are the list of .mp4 file names '''
     program = 'ffmpeg -f concat'
-    input_area = generate_concat_files_list_str(parts)
+    input_area = _generate_concat_files_list_option(parts)
     method = '-c copy %s' % result_file_name
     temp_bucket = [program, input_area, method]
     return ' '.join(temp_bucket)

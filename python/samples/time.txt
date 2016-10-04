@@ -1,0 +1,32 @@
+# Filter 1-5, Change format to default ffmpeg mp4 output setting.
+# Concat together using concat filter.
+
+real	0m13.793s
+user	0m12.962s
+sys	0m0.398s
+
+real	0m19.461s
+user	0m17.459s
+sys	0m0.178s
+
+real	0m38.590s
+user	0m35.081s
+sys	0m0.399s
+
+real	0m31.849s
+user	0m29.926s
+sys	0m0.243s
+
+real	0m14.570s
+user	0m12.899s
+sys	0m0.163s
+
+# concat with a concat filter --> time is really long
+real	1m33.535s
+user	1m25.806s
+sys	0m0.569s
+
+# Filter 1-5, Change format to slow and crf 18 high resolution settings.
+# Concat together using ffmpeg file concat solution.
+
+The concat happens instantly.

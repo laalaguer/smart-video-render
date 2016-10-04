@@ -3,7 +3,7 @@ from context import bake as bake  # env of our project src
 cake = {
     'layers': [
         {
-            'uid': '1.mp4',
+            'resource': '1.mp4',
             'start': '10',
             'end': '12',
             'filters': [
@@ -15,7 +15,7 @@ cake = {
             ],
         },
         {
-            'uid': '2.mp4',
+            'resource': '2.mp4',
             'start': '2',
             'end': '4',
             'filters': [
@@ -27,7 +27,7 @@ cake = {
             ],
         },
         {
-            'uid': '3.mp4',
+            'resource': '3.mp4',
             'start': '16',
             'end': '18',
             'filters': [
@@ -77,4 +77,4 @@ def test_generate_filtergraph():
 
 
 def test_generate_full_command_line():
-    assert 'myresult.mp4' in bake.generate_full_command_line(cake, 'myresult.mp4')
+    assert 'myresult.mp4' in bake.generate_single_render_command_line(cake, 'myresult.mp4')
