@@ -6,14 +6,12 @@ import json
 
 
 def json_file_to_jsonobj(filename):
-    ''' return a json python object based on the json file '''
     with open(filename, 'r') as f:
         json_string = ''.join(f.readlines())
         return json.loads(json_string)
 
 
 def json_string_to_jsonobj(json_str):
-    ''' return a json object based on the json string input '''
     return json.loads(json_str)
 
 
@@ -41,9 +39,10 @@ def json_string_to_jsonobj(json_str):
 # },{
 #   # --- range No.2 ---
 # }]
+
 def split_ranges(cake_hash, cake):
-    ''' input a fcp cake dict, return a list of bake jobs.
-    Without the overlapping of range, so split ranges.
+    ''' Helper function: Input a fcp cake dict, return a list of bake jobs.
+        Without the overlapping of range, so split ranges.
     '''
     cakes_container = []
     for each in cake['ranges']:

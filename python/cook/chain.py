@@ -1,10 +1,13 @@
-# set up a single chain.
-# The chain looks like this:
-# [pad][pad]... filter, filter, filter [pad][pad]...
-# multiple inputs and outputs, they are called pads
+# STABLE
+# Filter graph of ffmpeg consists of multiple "chians".
+# Each chain looks like this:
+# [in_pad][in_pad]... filter, filter, filter [out_pad][out_pad]...
+# Multiple inputs and outputs, they are called pads.
+# Between pads, are the filters to be applied in sequence to the video/audio
 
 
 class FilterIsEmptyInChain(Exception):
+    ''' If filter list is empty we raise exception '''
     pass
 
 

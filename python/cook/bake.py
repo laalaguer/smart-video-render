@@ -5,7 +5,7 @@
 # }
 #
 # layer = {
-#   'resource':'resource file name',
+#   'resource':'resource file location', # it can be a protocol and network location see "ffmpeg protocol"
 #   'start': 'start frame',
 #   'end': 'end frame',
 #   'filters': [
@@ -21,12 +21,12 @@ import effect
 
 
 def filter_adapter(filterobj):
-    ''' convert a filter dict object in a cake layer into a ffmpeg filter str '''
+    ''' ffmpeg filter dict object --> ffmpeg filter str '''
     return effect.make_filter(filterobj['name'], *filterobj['values'], **filterobj['kwvalues'])
 
 
 def trim_filter_adapter(layerobj):
-    ''' convert a layer of cake time requirements in to a ffmpeg filter str '''
+    ''' make a trim ffmpeg filter str '''
     return effect.make_filter(
         effect.preset_filters['trim'],
         **{'start_frame': layerobj['start'], 'end_frame': layerobj['end']}
@@ -34,17 +34,57 @@ def trim_filter_adapter(layerobj):
 
 
 def setpts_filter_adapter(layerobj):
-    ''' convert a layer of cake to align again into first frame '''
+    ''' make a -reset starting frame- ffmpeg filter str '''
     return effect.make_filter(effect.preset_filters['setpts'], *['PTS-STARTPTS'])
 
 
-def generate_filtergraph(cake, outputpad):
-    ''' From a cake obj, generate a list,
-    each list item is a filter chain, its called filtergraph.
-    The return is the list.
-    You can further join the list to form a filter graph string
+def _generate_program_location(ffmpeg_location=None):
+    ''' Where we can find ffmpeg program on the linux machine'''
+    if ffmpeg_location:
+        return ffmpeg_location
+    else:
+        return 'ffmpeg'
+
+
+def _generate_process_section(logfilename=None):
+    ''' ffmpeg process switch, logfilename is linux stile location '''
+    if logfilename:
+        return '-process %s' % logfilename
+    else:
+        return '-process %s' % 'process_log.txt'
+
+
+def _get_input_files(cake):
+    ''' Helper function: get input files from cake,
+        return real file names on the hard disk (linux style)
+        Or if you input according to ffmpeg protocol,
+        don't forget the protocol prefix, see "ffmpeg protocol"
     '''
-    temp_prefix = 'processpad'
+    return [each['resource'] for each in cake['layers']]
+
+
+def _generate_input_section(inputfiles):
+    ''' Helper function: generate input switch of ffmpeg command,
+        like: -i a.mp4 -i b.mp4 ...
+        Return: a string
+    '''
+    return ' '.join(['-i %s' % (each) for each in inputfiles])
+
+
+def _generate_video_codec_section(codecname, codecflag):
+    ''' Helper function: generate codec switch of ffmpeg command,
+        like: -codec:v libx264 -crf 18 -preset slow
+        You have to fill in "libx264" and "-crf 18 -preset slow"
+        Return: a string
+    '''
+    return '-codec:v %s %s' % (codecname, codecflag)
+
+
+def get_filtergraph_chains(cake, outputpad):
+    ''' From a cake obj, generate a list of chains. Then return.
+        You can further join the list to form a filter graph string.
+    '''
+    temp_prefix = 'processedpad'
     middle_chains = []
     # render each clip with its own effects
     for idx, each in enumerate(cake['layers']):
@@ -70,36 +110,45 @@ def generate_filtergraph(cake, outputpad):
     return middle_chains
 
 
-def get_input_files(cake):
-    ''' helper function: get input files from cake
-    return real file names on the hard disk (linux style)
+def generate_cake_render_command(cake, result_file_name,
+                                 codecname='libx264',
+                                 codecflag='-crf 18 -preset slow',
+                                 ffmpeg_location=None,
+                                 logfilename=None):
+    ''' Generate a full ffmpeg command line to render a cake into a result file.
+        @cake: The cake obj defined in this file.
+        @result_file_name: File name including suffix(.mp4). FFMEG protocol is also supported.
+        @codecname: The codec you want to encode the result with.
+        @codecflag: Fine tuning codec parameters.
+        @ffmpeg_location: the ffmpeg program location.
+        @logfilename: The temp log file of monitring progress. linux style path.
+        Return: a command line string.
     '''
-    return [each['resource'] for each in cake['layers']]
+    program = _generate_program_location(ffmpeg_location)
+    progress_switch = _generate_process_section(logfilename)
+    input_switch = _generate_input_section(_get_input_files(cake))
+    filter_graph_switch = '"%s"' % ';'.join(get_filtergraph_chains(cake, 'out'))
+    codec_switch = _generate_video_codec_section(codecname, codecflag)
+    output_switch = '-map "[out]" %s' % result_file_name
 
+    temp_bucket = [program, progress_switch, input_switch, filter_graph_switch, codec_switch, output_switch]
 
-def generate_single_render_command_line(cake, result_file_name):
-    ''' Generate a full command line to ensure a render process'''
-    program = 'ffmpeg'
-    input_files = ['-i %s' % (each) for each in get_input_files(cake)]
-    input_files_str = ' '.join(input_files)
-    method = '-filter_complex'
-    filtergraph_str = '"%s"' % ';'.join(generate_filtergraph(cake, 'out'))
-    output_format = '-codec:v libx264 -crf 18 -preset slow'
-    sufix = '-map "[out]" %s' % result_file_name
-
-    temp_bucket = [program, input_files_str, method, filtergraph_str, output_format, sufix]
     return ' '.join(temp_bucket)
 
 
 def _generate_concat_files_list_option(parts):
-    ''' parts are the file names with .mp4 you want to concat together
+    ''' Helper function: no longer need to write a concat.txt file.
+        @parts: file names "x.mp4" you want to concat together. Linux style.
+        Support ffmpeg protocol.
     '''
     inputs = ' '.join(parts)
     return "-safe 0 -i <(printf \"file '$PWD/%s'\\n\" " + inputs + ")"
 
 
-def generate_concat_command_line(parts, result_file_name):
-    ''' parts are the list of .mp4 file names '''
+def generate_concat_command(parts, result_file_name):
+    ''' @parts: files you want to concat, linux style. Support ffmpeg protocol.
+        @result_file_name: the result output file name, support ffmpeg protocol.
+    '''
     program = 'ffmpeg -f concat'
     input_area = _generate_concat_files_list_option(parts)
     method = '-c copy %s' % result_file_name

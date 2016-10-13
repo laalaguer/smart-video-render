@@ -66,15 +66,15 @@ def trim_filter_adapter():
 
 
 def test_get_input_files():
-    assert '1.mp4' in bake.get_input_files(cake)
-    assert '2.mp4' in bake.get_input_files(cake)
-    assert '3.mp4' in bake.get_input_files(cake)
+    assert '1.mp4' in bake._get_input_files(cake)
+    assert '2.mp4' in bake._get_input_files(cake)
+    assert '3.mp4' in bake._get_input_files(cake)
 
 
 def test_generate_filtergraph():
-    assert len(bake.generate_filtergraph(cake, 'myoutput')) == len(cake['layers']) * 2
-    assert 'myoutput' in bake.generate_filtergraph(cake, 'myoutput')[-1]
+    assert len(bake.get_filtergraph_chains(cake, 'myoutput')) == len(cake['layers']) * 2
+    assert 'myoutput' in bake.get_filtergraph_chains(cake, 'myoutput')[-1]
 
 
 def test_generate_full_command_line():
-    assert 'myresult.mp4' in bake.generate_single_render_command_line(cake, 'myresult.mp4')
+    assert 'myresult.mp4' in bake.generate_cake_render_command(cake, 'myresult.mp4')

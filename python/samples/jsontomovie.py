@@ -20,8 +20,9 @@ def get_single_ffmpeg_cake(fcpcake):
         layer['resource'] = each['video']['ref']  # G
         layer['start'] = cake_range_start - clip_delay_offset  # G
         layer['end'] = cake_range_end - clip_delay_offset  # G
-        layer['filters'] = [translate.translate_table.get(every) for every in each.keys() if 'adjust' in every]
-        layer['filters'].extend([translate.translate_table.get(every) for every in each.keys() if 'filter' in every])
+        layer['filters'] = [translate.fcp_effect_to_ffmpeg_filter(every) for every in each.keys() if 'adjust' in every]
+        layer['filters'].extend([translate.fcp_effect_to_ffmpeg_filter(every)
+                                 for every in each.keys() if 'filter' in every])
         layers.append(layer)
 
     return {'uid': cake_uid, 'layers': layers}
@@ -47,19 +48,26 @@ def get_render_commands(ffmpeg_cakes):
     movie_chunk_names = []  # Generated movie file names on the hard disk.
     for each_ffmpeg_cake in ffmpeg_cakes:
         output_file_name = '%s.mp4' % each_ffmpeg_cake['uid']
-        render_commands.append(bake.generate_single_render_command_line(each_ffmpeg_cake, output_file_name))
+        render_commands.append(bake.generate_cake_render_command(each_ffmpeg_cake, output_file_name))
         movie_chunk_names.append(output_file_name)
 
     return render_commands
 
 
-def render_ffmpeg_cakes(render_commands):
+def render_ffmpeg_cakes(render_commands, debug=False):
     ''' Real operating system execution to render ffmpeg cake '''
+    if debug:
+        for each in render_commands:
+            print each
+        return
+
     import subprocess
     for each in render_commands:  # bake each ffmpeg cake into movie chunk
         print each
         print '-----------------'
-        subprocess.call(each, shell=True)
+        returncode = subprocess.call(each, shell=True)
+        if returncode > 0:
+            raise Exception('Command %s failed. Exit code %d' % (each, returncode))
 
 
 if __name__ == "__main__":
@@ -78,7 +86,7 @@ if __name__ == "__main__":
     render_commands = linked_render_commands
     # Fix end.
 
-    render_ffmpeg_cakes(render_commands)
+    render_ffmpeg_cakes(render_commands, debug=True)  # debug = False will try to render
     # join the movie parts together into a final movie.
     # commandline = []
     # commandline.append('/bin/bash')

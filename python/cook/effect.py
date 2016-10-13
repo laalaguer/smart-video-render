@@ -1,29 +1,14 @@
-# Generate Proper FFMPEG filter arguments
-class NoSuchPresetFilter(Exception):
-    pass
-
-
-preset_filters = {
-    'black-and-white': 'hue=s=0',
-    'vflip': 'vflip',
-    'hflip': 'hflip',
-    'fifo': 'fifo',
-    'frame-align': 'setpts=PTS-STARTPTS',
-    'overlay': 'overlay',
-    'setpts': 'setpts',
-    'trim': 'trim',
-}
-
-
-def get_preset_filter(name):
-    try:
-        return preset_filters[name]
-    except KeyError:
-        raise NoSuchPresetFilter('filter name %s not found' % name)
+# UNSTABLE
+# Filter graph of ffmpeg consists of multiple "chians".
+# Each chain looks like this:
+# [in_pad][in_pad]... filter, filter, filter [out_pad][out_pad]...
+# Multiple inputs and outputs, they are called pads.
+# Between pads, are the filters to be applied in sequence to the video/audio
+# We generate suitable filter string in this file.
 
 
 def make_filter(name, *args, **kwargs):
-    ''' Make a filter usable. Final string has three forms.
+    ''' Make a filter. The string has four forms:
     filter
     filter=value:value:value
     filter=key=value:key=value:key=value
@@ -43,3 +28,30 @@ def make_filter(name, *args, **kwargs):
             return prefix + kwvalues
         else:
             return prefix + values
+
+
+class NoSuchPresetFilter(Exception):
+    pass
+
+
+preset_filters = {
+    'black-and-white': 'hue=s=0',
+    'vflip': 'vflip',
+    'hflip': 'hflip',
+    'fifo': 'fifo',
+    'frame-align': 'setpts=PTS-STARTPTS',
+    'overlay': 'overlay',
+    'setpts': 'setpts',
+    'trim': 'trim',
+}
+
+
+def get_preset_filter(name):
+    ''' Deprecated method, use make_filter() instead
+        Instead of making a filter by hand,
+        We generate a preset filter, if we have the name.
+    '''
+    try:
+        return preset_filters[name]
+    except KeyError:
+        raise NoSuchPresetFilter('filter name %s not found' % name)
