@@ -9,3 +9,4 @@ from cook import effect
 from cook import chain
 from cook import bake
 from cook import translate
+from cook import worker

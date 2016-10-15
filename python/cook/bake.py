@@ -46,12 +46,12 @@ def _generate_program_location(ffmpeg_location=None):
         return 'ffmpeg'
 
 
-def _generate_process_section(logfilename=None):
-    ''' ffmpeg process switch, logfilename is linux stile location '''
+def _generate_progress_section(logfilename=None):
+    ''' ffmpeg -progress switch, logfilename is linux stile location '''
     if logfilename:
-        return '-process %s' % logfilename
+        return '-progress %s' % logfilename
     else:
-        return '-process %s' % 'process_log.txt'
+        return '-progress %s' % 'process_log.txt'
 
 
 def _get_input_files(cake):
@@ -110,28 +110,25 @@ def get_filtergraph_chains(cake, outputpad):
     return middle_chains
 
 
-def generate_cake_render_command(cake, result_file_name,
-                                 codecname='libx264',
-                                 codecflag='-crf 18 -preset slow',
-                                 ffmpeg_location=None,
-                                 logfilename=None):
+def generate_cake_render_command(cake, result_file_name, codecname='libx264', codecflag='-crf 18 -preset slow', ffmpeg_location=None, progressfilename=None, overwriteflag='-y'):
     ''' Generate a full ffmpeg command line to render a cake into a result file.
         @cake: The cake obj defined in this file.
         @result_file_name: File name including suffix(.mp4). FFMEG protocol is also supported.
         @codecname: The codec you want to encode the result with.
         @codecflag: Fine tuning codec parameters.
         @ffmpeg_location: the ffmpeg program location.
-        @logfilename: The temp log file of monitring progress. linux style path.
+        @progressfilename: The temp log file of monitring progress. linux style path.
         Return: a command line string.
     '''
     program = _generate_program_location(ffmpeg_location)
-    progress_switch = _generate_process_section(logfilename)
+    progress_switch = _generate_progress_section(progressfilename)
     input_switch = _generate_input_section(_get_input_files(cake))
-    filter_graph_switch = '"%s"' % ';'.join(get_filtergraph_chains(cake, 'out'))
+    filter_graph_switch = '-filter_complex "%s"' % ';'.join(get_filtergraph_chains(cake, 'out'))
     codec_switch = _generate_video_codec_section(codecname, codecflag)
     output_switch = '-map "[out]" %s' % result_file_name
 
-    temp_bucket = [program, progress_switch, input_switch, filter_graph_switch, codec_switch, output_switch]
+    temp_bucket = [program, overwriteflag, progress_switch,
+                   input_switch, filter_graph_switch, codec_switch, output_switch]
 
     return ' '.join(temp_bucket)
 

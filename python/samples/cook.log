@@ -1,0 +1,3 @@
+[INFO][2016-10-14 11:42:57,073][worker.py:clean_log:69][Try to delete progress file name progress.txt]
+[INFO][2016-10-14 11:42:57,075][worker.py:_render:44][Try to execute command: ffmpeg -y -progress progress.txt -i WP_20140830_15_13_44_Pro.mp4 -filter_complex "[0]trim=end_frame=206:start_frame=114,setpts=PTS-STARTPTS[processedpad0];[processedpad0]fifo[out]" -codec:v libx264 -crf 18 -preset slow -map "[out]" bd90baabaa8c2e9759cf97a890bf0b78-114-206.mp4]
+[INFO][2016-10-14 11:43:14,338][worker.py:clean_log:69][Try to delete progress file name progress.txt]

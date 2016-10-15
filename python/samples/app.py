@@ -1,8 +1,8 @@
 # read fcp-cakes from a json file,
 # convert fcp-cake into a ffmpeg-cake
 from context import translate as translate
-from context import bake as bake
 from context import jsonhelper as jsonhelper
+from context import worker as worker
 
 
 def get_single_ffmpeg_cake(fcpcake):
@@ -39,57 +39,41 @@ def convert_fcp_to_ffmpeg(grouped_fcp_cakes):
 
     return ffmpeg_cakes
 
-
-def get_render_commands(ffmpeg_cakes):
-    ''' Input: ffmpeg_cakes description, in a list. final_concat_name shall contain .mp4
-    Output: Command lines that can be executed by bash/sh
-    '''
-    render_commands = []  # Command line to execute one by one finally.
-    movie_chunk_names = []  # Generated movie file names on the hard disk.
-    for each_ffmpeg_cake in ffmpeg_cakes:
-        output_file_name = '%s.mp4' % each_ffmpeg_cake['uid']
-        render_commands.append(bake.generate_cake_render_command(each_ffmpeg_cake, output_file_name))
-        movie_chunk_names.append(output_file_name)
-
-    return render_commands
+import threading
+import time
 
 
-def render_ffmpeg_cakes(render_commands, debug=False):
-    ''' Real operating system execution to render ffmpeg cake '''
-    if debug:
-        for each in render_commands:
-            print each
-        return
+class StatusCheckThread (threading.Thread):
+    def __init__(self, render_worker_obj):
+        threading.Thread.__init__(self)
+        self.renderer = render_worker_obj
 
-    import subprocess
-    for each in render_commands:  # bake each ffmpeg cake into movie chunk
-        print each
-        print '-----------------'
-        returncode = subprocess.call(each, shell=True)
-        if returncode > 0:
-            raise Exception('Command %s failed. Exit code %d' % (each, returncode))
-
+    def run(self):
+        counter = 0
+        while True:
+            with open('thread.txt', 'a') as f:
+                f.write(str(counter) + str(self.renderer.status()) + '\n')
+            time.sleep(1)
+            counter += 1
 
 if __name__ == "__main__":
     grouped_fcp_cakes = jsonhelper.json_file_to_jsonobj('sample.json')
 
     ffmpeg_cakes = convert_fcp_to_ffmpeg(grouped_fcp_cakes)
 
-    render_commands = get_render_commands(ffmpeg_cakes)
-
     # Fix: r2 or r3 not related to the actual file name
-    linked_render_commands = []
-    for each in render_commands:
-        temp = each.replace(' r2 ', ' WP_20140830_14_39_10_Pro.mp4 ').replace(' r3 ', ' WP_20140830_15_13_44_Pro.mp4 ')
-        linked_render_commands.append(temp)
-
-    render_commands = linked_render_commands
+    for each_ffmpeg_cake in ffmpeg_cakes:
+        layers = each_ffmpeg_cake['layers']
+        for each_layer in layers:
+            each_layer['resource'] = each_layer['resource'].replace('r2', 'WP_20140830_14_39_10_Pro.mp4')
+            each_layer['resource'] = each_layer['resource'].replace('r3', 'WP_20140830_15_13_44_Pro.mp4')
     # Fix end.
 
-    render_ffmpeg_cakes(render_commands, debug=True)  # debug = False will try to render
-    # join the movie parts together into a final movie.
-    # commandline = []
-    # commandline.append('/bin/bash')
-    # commandline.append('-c')
-    # commandline.append(render_commands[-1])
-    # child = subprocess.Popen(commandline)
+    my_worker = worker.RenderWorker()
+
+    for each_ffmpeg_cake in ffmpeg_cakes:
+        checkingthread = StatusCheckThread(my_worker)
+        checkingthread.start()
+
+        my_worker.render(each_ffmpeg_cake, each_ffmpeg_cake['uid'] + '.mp4')
+        my_worker.clean_log()
