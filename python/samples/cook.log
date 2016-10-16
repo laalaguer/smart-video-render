@@ -1,1 +1,0 @@
-[INFO][2016-10-16 15:52:11,938][worker.py:_render:88][Try to execute command: ffmpeg -y -progress 20161016-155211.progress -i WP_20140830_15_13_44_Pro.mp4 -filter_complex "[0]trim=end_frame=206:start_frame=114,setpts=PTS-STARTPTS[processedpad0];[processedpad0]fifo[out]" -codec:v libvpx-vp9 -crf 18 -b:v 0 -map "[out]" bd90baabaa8c2e9759cf97a890bf0b78-114-206.webm]
