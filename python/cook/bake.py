@@ -1,21 +1,3 @@
-# Bake a Cake into an acutal Movie Clip mp4
-# cake = {
-#     'layers': [layer, layer, layer], -- > the left side is the bottom, the right side is the upper
-#     'uid': xxx ---> xxx-rangestart-rangeend --> hash id and range of the cake
-# }
-#
-# layer = {
-#   'resource':'resource file location', # it can be a protocol and network location see "ffmpeg protocol"
-#   'start': 'start frame',
-#   'end': 'end frame',
-#   'filters': [
-#       {'name':'filter-name', 'values':[value1, value2,...], 'kwvalues':{dict}},
-#       {dict},
-#       {dict},
-#   ]
-# }
-# We can produce a filtergraph, and a command line.
-
 import chain
 import effect
 

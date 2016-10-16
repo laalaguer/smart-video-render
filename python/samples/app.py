@@ -25,7 +25,7 @@ def get_single_ffmpeg_cake(fcpcake):
                                  for every in each.keys() if 'filter' in every])
         layers.append(layer)
 
-    return {'uid': cake_uid, 'layers': layers}
+    return {'uid': cake_uid, 'layers': layers, 'range_start': cake_range_start, 'range_end': cake_range_end}
 
 
 def convert_fcp_to_ffmpeg(grouped_fcp_cakes):
@@ -43,18 +43,23 @@ import threading
 import time
 
 
-class StatusCheckThread (threading.Thread):
-    def __init__(self, render_worker_obj):
-        threading.Thread.__init__(self)
-        self.renderer = render_worker_obj
+def checker(workerobj):
+    count = 0
+    while True:
+        current_status = workerobj.render_progress()
+        if 'error' in current_status:
+            print '###error', current_status['error']
+            count += 1
+        elif 'progress' in current_status and current_status['progress'] == 'end':
+            print '###finished', current_status
+            break
+        else:
+            print '###in progress', current_status
 
-    def run(self):
-        counter = 0
-        while True:
-            with open('thread.txt', 'a') as f:
-                f.write(str(counter) + str(self.renderer.status()) + '\n')
-            time.sleep(1)
-            counter += 1
+        if count > 10:
+            break
+        time.sleep(1)
+
 
 if __name__ == "__main__":
     grouped_fcp_cakes = jsonhelper.json_file_to_jsonobj('sample.json')
@@ -69,11 +74,24 @@ if __name__ == "__main__":
             each_layer['resource'] = each_layer['resource'].replace('r3', 'WP_20140830_15_13_44_Pro.mp4')
     # Fix end.
 
-    my_worker = worker.RenderWorker()
+    my_h264_worker = worker.RenderWorker()
 
-    for each_ffmpeg_cake in ffmpeg_cakes:
-        checkingthread = StatusCheckThread(my_worker)
-        checkingthread.start()
+    check_thread = threading.Thread(target=checker, args=(my_h264_worker,))
+    check_thread.setDaemon(True)
+    check_thread.start()
 
-        my_worker.render(each_ffmpeg_cake, each_ffmpeg_cake['uid'] + '.mp4')
-        my_worker.clean_log()
+    for idx, each_ffmpeg_cake in enumerate(ffmpeg_cakes):
+        my_h264_worker.render(each_ffmpeg_cake, each_ffmpeg_cake['uid'] + '.mp4')
+        # my_h264_worker.clean_log()
+
+    time.sleep(5)
+
+    my_vp9_worker = worker.RenderWorker(codecname='libvpx-vp9', codecflag='-crf 18 -b:v 0')
+    check_thread = threading.Thread(target=checker, args=(my_vp9_worker,))
+    check_thread.setDaemon(True)
+    check_thread.start()
+    for idx, each_ffmpeg_cake in enumerate(ffmpeg_cakes):
+        my_vp9_worker.render(each_ffmpeg_cake, each_ffmpeg_cake['uid'] + '.webm')
+        # my_vp9_worker.clean_log()
+
+    time.sleep(5)

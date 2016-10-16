@@ -1,6 +1,15 @@
 *.pyc
 .cache
 __pycache__
+
+# video artifacts
 *.mp4
+*.webm
+
 *.swp
 *.sh
+
+# log artifacts
+*.log
+*.log.*
+*.progress

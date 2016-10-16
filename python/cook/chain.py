@@ -13,9 +13,9 @@ class FilterIsEmptyInChain(Exception):
 
 def get_single_chain(inputpads, outputpads, filters):
     ''' concat string to make a suitable single chain
-    inputpads = [str, str, str...]
-    ouputpads = [str, str, str...]
-    filters = [str, str, str] but cannot be empty
+        @inputpads = [str, str, str...]
+        @ouputpads = [str, str, str...]
+        @filters = [str, str, str] but cannot be empty
     '''
     if not filters:
         raise FilterIsEmptyInChain(
@@ -34,7 +34,7 @@ def generate_fifo_chain(inputpad, outputpad):
 
 def generate_overlay_chains(inputpads, outputpad):
     ''' A quick method to generate a list of sequencial chians.
-    Simply overlay each other and then have an end point of outputpad
+        Simply overlay each other and then have an end point of outputpad
     '''
     temp_prefix = 'overlaypad'
     length = len(inputpads)

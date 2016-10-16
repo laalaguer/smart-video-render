@@ -9,10 +9,10 @@
 
 def make_filter(name, *args, **kwargs):
     ''' Make a filter. The string has four forms:
-    filter
-    filter=value:value:value
-    filter=key=value:key=value:key=value
-    filter=value:value:key=value:key=value
+        filter
+        filter=value:value:value
+        filter=key=value:key=value:key=value
+        filter=value:value:key=value:key=value
     '''
     if not args and not kwargs:
         return name
@@ -30,10 +30,12 @@ def make_filter(name, *args, **kwargs):
             return prefix + values
 
 
+# Deprecated
 class NoSuchPresetFilter(Exception):
     pass
 
 
+# Deprecated
 preset_filters = {
     'black-and-white': 'hue=s=0',
     'vflip': 'vflip',
@@ -46,6 +48,7 @@ preset_filters = {
 }
 
 
+# Deprecated
 def get_preset_filter(name):
     ''' Deprecated method, use make_filter() instead
         Instead of making a filter by hand,
