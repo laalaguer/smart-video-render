@@ -29,6 +29,7 @@ class RenderWorker():
         self.codecflag = codecflag
         self.progressfilename = None
         self.is_render = False  # Flag of during rendering or not.
+        self.failed = False  # Flag of the current job has failed or not.
         self.cake = None  # Hold the cake we want to render
 
     def worker_settings(self):
@@ -37,21 +38,24 @@ class RenderWorker():
     def is_rendering(self):
         return self.is_render
 
+    def has_failed(self):
+        return self.failed
+
     def get_cake(self):
         return self.cake  # Get the current cake that mounted on the worker.
 
     def status(self):
-        ''' Show progres of ffmpeg rendering '''
+        ''' Show progres of ffmpeg rendering progress file. '''
         if self.progressfilename is None:
             return {'error': 'File Not Exist'}
 
         try:
             with open(self.progressfilename, 'r') as f:
-                finaloutput = tailer.tail(f, lines=22)  # magic number here.
+                finaloutput = tailer.tail(f, lines=22)  # magic number.
                 status_dict = {}
-                for each in finaloutput[::-1]:  # from behind to front
+                for each in finaloutput[::-1]:  # from behind to front.
                     pure = each.strip().split('=')
-                    key, value = pure  # unpack the key value pair
+                    key, value = pure  # unpack the key value pair.
                     if key not in status_dict:
                         status_dict[key] = value
 
@@ -61,28 +65,29 @@ class RenderWorker():
                     return {'error': 'File Is Empty'}
 
         except IOError:
-            return {'error': 'File Not Exist'}
+            return {'error': 'Cannot Read File. IOError.'}
 
     def render_progress(self):
-        ''' Show rendering progress of current worker '''
+        ''' Show rendering progress of current worker, including status from ffmpeg '''
+        ffmpeg_status = self.status()
+        ffmpeg_status['is_render'] = self.is_rendering()
+        ffmpeg_status['has_failed'] = self.has_failed()
+
         if self.cake and self.is_rendering() and 'error' not in self.status():
-            ffmpeg_status = self.status()
-            ffmpeg_status['is_render'] = self.is_rendering()
             percent = int(ffmpeg_status['frame']) / \
                 (int(self.cake['range_end']) - int(self.cake['range_start']))
             percent *= 100
             percent = int(percent)
             ffmpeg_status['percent'] = percent
-            return ffmpeg_status
-        else:
-            ffmpeg_status = self.status()
-            ffmpeg_status['is_render'] = self.is_rendering()
-            return ffmpeg_status
+
+        return ffmpeg_status
 
     def _render(self, render_command):
-        ''' Directly execute a ffmpeg command, ignore settings in global settings. '''
+        ''' Directly execute a ffmpeg command, ignore settings in global settings.
+            raise RenderProgressError if ffmpeg calling has something wrong.
+        '''
         if not render_command:
-            logger.warning('Empty ffmpeg render command')
+            logger.error('Empty ffmpeg render command')
         else:
             # Step 2. Call subprocess to process this command.
             logger.info('Try to execute command: %s' % render_command)
@@ -90,19 +95,13 @@ class RenderWorker():
                 self.is_render = True  # Now we entering rendering.
                 returncode = subprocess.call(render_command, shell=True)
                 if returncode > 0:
-                    raise RenderProgressError('Command %s failed. Exit code %d' % (render_command, returncode))
+                    raise RenderProgressError('Command [%s] failed. Exit code %d' % (render_command, returncode))
             except:
-                logger.error('Command %s failed. Exit code %d' % (render_command, returncode))
-                raise RenderProgressError('Command %s failed. Exit code %d' % (render_command, returncode))
+                logger.exception('Command [%s] failed. Exit code %d' % (render_command, returncode))
+                raise RenderProgressError('Command [%s] failed. Exit code %d' % (render_command, returncode))
 
             finally:
                 self.is_render = False
-
-    def _make_time_now_str(self):
-        ''' Automatically return a name as current time '''
-        now = datetime.datetime.now()
-        str_now = datetime.datetime.strftime(now, '%Y%m%d-%H%M%S')
-        return str_now
 
     def render(self, cake, resultfilename=None):
         # Step 1. Mount the cake onto worker
@@ -117,10 +116,15 @@ class RenderWorker():
         # Step 4. Render progress
         render_command = ''
         try:
+            self.failed = False  # We haven't failed, yet.
             render_command = bake.generate_cake_render_command(self.cake, resultfilename, self.codecname,
                                                                self.codecflag, self.ffmpeg, self.progressfilename)
             self._render(render_command)
+        except RenderProgressError as ex:
+            self.failed = True
+            raise ex
         except:
+            self.failed = True
             logger.error('Cake %s cannot be converted to a ffmpeg command' % cake['uid'])
             raise RenderCommandError('cake %s cannot be converted to a ffmpeg command' % cake['uid'])
         finally:
@@ -132,3 +136,9 @@ class RenderWorker():
             os.remove(self.progressfilename)
         except Exception:
             logger.error('Remove File %s Failed.' % self.progressfilename)
+
+    def _make_time_now_str(self):
+        ''' Automatically return a name as current time '''
+        now = datetime.datetime.now()
+        str_now = datetime.datetime.strftime(now, '%Y%m%d-%H%M%S')
+        return str_now

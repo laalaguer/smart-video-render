@@ -17,7 +17,8 @@ def get_single_ffmpeg_cake(fcpcake):
     for each in fcpcake['clips']:
         clip_delay_offset = each['offset']  # Clip Delay according to the base clip.
         layer = {}
-        layer['resource'] = each['video']['ref']  # G
+        layer['resource'] = each['video']['ref'] if '.mp4' in each[
+            'video']['ref'] else each['video']['ref'] + '.mp4'  # G
         layer['start'] = cake_range_start - clip_delay_offset  # G
         layer['end'] = cake_range_end - clip_delay_offset  # G
         layer['filters'] = [translate.fcp_effect_to_ffmpeg_filter(every) for every in each.keys() if 'adjust' in every]
@@ -32,8 +33,8 @@ def convert_fcp_to_ffmpeg(grouped_fcp_cakes):
     ''' convert fcp cakes into ffmpeg cakes '''
     ffmpeg_cakes = []  # The ffmpeg cakes ready to be put on the oven of ffmpeg to cook
 
-    for each_cake_hash in grouped_fcp_cakes.keys():
-        splitted_fcp_cakes = jsonhelper.split_ranges(each_cake_hash, grouped_fcp_cakes[each_cake_hash])
+    for each_fcp_cake_obj in grouped_fcp_cakes:
+        splitted_fcp_cakes = jsonhelper.split_ranges(each_fcp_cake_obj['hash'], each_fcp_cake_obj)
         for each_single_cake in splitted_fcp_cakes:
             ffmpeg_cakes.append(get_single_ffmpeg_cake(each_single_cake))
 
@@ -47,14 +48,9 @@ def checker(workerobj):
     count = 0
     while True:
         current_status = workerobj.render_progress()
-        if 'error' in current_status:
-            print '###error', current_status['error']
+        print current_status
+        if current_status['is_render'] is False:
             count += 1
-        elif 'progress' in current_status and current_status['progress'] == 'end':
-            print '###finished', current_status
-            break
-        else:
-            print '###in progress', current_status
 
         if count > 10:
             break
@@ -62,7 +58,7 @@ def checker(workerobj):
 
 
 if __name__ == "__main__":
-    grouped_fcp_cakes = jsonhelper.json_file_to_jsonobj('sample.json')
+    grouped_fcp_cakes = jsonhelper.json_file_to_jsonobj('cakes.json')
 
     ffmpeg_cakes = convert_fcp_to_ffmpeg(grouped_fcp_cakes)
 
