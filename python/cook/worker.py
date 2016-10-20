@@ -17,6 +17,15 @@ class RenderProgressError(Exception):
     pass
 
 
+class ReportHandler():
+    def __init__(self, name):
+        self.name = name
+
+    def report(self, messageobj):
+        ''' To be implemented by the child class.'''
+        pass
+
+
 class RenderWorker():
     def __init__(self, ffmpeg='ffmpeg', codecname='libx264', codecflag='-crf 18 -preset slow'):
         ''' @ffmpeg: ffmpeg location
@@ -31,6 +40,7 @@ class RenderWorker():
         self.is_render = False  # Flag of during rendering or not.
         self.failed = False  # Flag of the current job has failed or not.
         self.cake = None  # Hold the cake we want to render
+        self.report_handlers = []  # Hold the handlers of type ReportHandler
 
     def worker_settings(self):
         return {'ffmpeg': self.ffmpeg, 'codecname': self.codecname, 'codecflag': self.codecflag}
@@ -44,8 +54,50 @@ class RenderWorker():
     def get_cake(self):
         return self.cake  # Get the current cake that mounted on the worker.
 
+    def add_handler(self, handler):
+        ''' @handler : ReportHandler '''
+        self.report_handlers.append(handler)
+
+    def _report_progress(self, messageobj):
+        for each_handler in self.report_handlers:
+            each_handler.report(messageobj)
+
+    def report_progress(self):
+        ''' Show progress of ffmpeg rendering progress file. '''
+        if self.progressfilename is None:
+            self._report_progress({'error': 'Progress File Not Exist'})
+
+        try:
+            with open(self.progressfilename, 'r') as f:
+                status_dict = {
+                    'frame': None,
+                    'fps': None,
+                    'stream_0_0_q': None,
+                    'bitrate': None,
+                    'total_size': None,
+                    'out_time_ms': None,
+                    'out_time': None,
+                    'dup_frames': None,
+                    'drop_frames': None,
+                    'speed': None,
+                    'progress': None,
+                }  # The dict object hold the ffmpeg status
+
+                flush_count = 11
+                for each_status_line in tailer.follow(f):
+                    pure = each_status_line.strip().split('=')
+                    key, value = pure  # unpack the key value pair.
+                    # if key not in status_dict or status_dict[key] is None:
+                    #    status_dict[key] = value
+                    self._report_progress(status_dict)
+                else:
+                    self._report_progress({'error': 'Progress File Is Empty'})
+
+        except IOError:
+            return {'error': 'Cannot Read File. IOError.'}
+
     def status(self):
-        ''' Show progres of ffmpeg rendering progress file. '''
+        ''' Show progress of ffmpeg rendering progress file. '''
         if self.progressfilename is None:
             return {'error': 'File Not Exist'}
 
