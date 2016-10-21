@@ -44,17 +44,9 @@ import threading
 import time
 
 
-def checker(workerobj):
-    count = 0
-    while True:
-        current_status = workerobj.render_progress()
-        print current_status
-        if current_status['is_render'] is False:
-            count += 1
-
-        if count > 10:
-            break
-        time.sleep(1)
+class ScreenReporter(worker.ReportHandler):
+    def report(self, messageobj):
+        print '### Report to screen', str(messageobj)
 
 
 if __name__ == "__main__":
@@ -63,24 +55,23 @@ if __name__ == "__main__":
     ffmpeg_cakes = convert_fcp_to_ffmpeg(grouped_fcp_cakes)
 
     # Fix: r2 or r3 not related to the actual file name
-    for each_ffmpeg_cake in ffmpeg_cakes:
-        layers = each_ffmpeg_cake['layers']
-        for each_layer in layers:
-            each_layer['resource'] = each_layer['resource'].replace('r2', 'WP_20140830_14_39_10_Pro.mp4')
-            each_layer['resource'] = each_layer['resource'].replace('r3', 'WP_20140830_15_13_44_Pro.mp4')
+    # for each_ffmpeg_cake in ffmpeg_cakes:
+    #     layers = each_ffmpeg_cake['layers']
+    #     for each_layer in layers:
+    #         each_layer['resource'] = each_layer['resource'].replace('r2', 'WP_20140830_14_39_10_Pro.mp4')
+    #         each_layer['resource'] = each_layer['resource'].replace('r3', 'WP_20140830_15_13_44_Pro.mp4')
     # Fix end.
 
-    my_h264_worker = worker.RenderWorker(codecflag='-crf 18 -b:v 0 -preset ultrafast')
-
-    check_thread = threading.Thread(target=checker, args=(my_h264_worker,))
-    check_thread.setDaemon(True)
-    check_thread.start()
-
     for idx, each_ffmpeg_cake in enumerate(ffmpeg_cakes):
-        my_h264_worker.render(each_ffmpeg_cake, each_ffmpeg_cake['uid'] + '.mp4')
-        # my_h264_worker.clean_log()
+        my_h264_worker = worker.RenderWorker(codecflag='-crf 18 -preset veryfast')
+        my_h264_worker.add_handler(handler=ScreenReporter('screen_reporter'))
 
-    time.sleep(5)
+        check_thread = threading.Thread(target=my_h264_worker.report_progress)
+        check_thread.setDaemon(True)
+        check_thread.start()
+
+        my_h264_worker.render(each_ffmpeg_cake, each_ffmpeg_cake['uid'] + '.mp4')
+        time.sleep(2)  # let the report till the end.
 
     # my_vp9_worker = worker.RenderWorker(codecname='libvpx-vp9', codecflag='-crf 18 -b:v 0')
     # check_thread = threading.Thread(target=checker, args=(my_vp9_worker,))

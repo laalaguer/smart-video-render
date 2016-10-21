@@ -4,6 +4,7 @@ import tailer
 import subprocess
 import os
 import datetime
+import time
 
 import logging
 logger = logging.getLogger(__name__)
@@ -59,42 +60,60 @@ class RenderWorker():
         self.report_handlers.append(handler)
 
     def _report_progress(self, messageobj):
+        progressobj = self._hook_worker_status(messageobj)
         for each_handler in self.report_handlers:
-            each_handler.report(messageobj)
+            each_handler.report(progressobj)
 
-    def report_progress(self):
-        ''' Show progress of ffmpeg rendering progress file. '''
-        if self.progressfilename is None:
-            self._report_progress({'error': 'Progress File Not Exist'})
+    def report_progress(self, max_retry_times=20):
+        ''' Show progress of ffmpeg rendering progress file.
+            It has no return. It is a blocking thread.
+        '''
+        retry = max_retry_times
+        while retry:
+            if self.progressfilename is None:
+                self._report_progress({'report': 'Progress File Not Exist'})
+                retry -= 1
+                time.sleep(0.5)  # Sleep 0.5 then retry
+                continue
 
-        try:
-            with open(self.progressfilename, 'r') as f:
-                status_dict = {
-                    'frame': None,
-                    'fps': None,
-                    'stream_0_0_q': None,
-                    'bitrate': None,
-                    'total_size': None,
-                    'out_time_ms': None,
-                    'out_time': None,
-                    'dup_frames': None,
-                    'drop_frames': None,
-                    'speed': None,
-                    'progress': None,
-                }  # The dict object hold the ffmpeg status
+            try:
+                with open(self.progressfilename, 'r') as f:
+                    status_dict = {}  # The dict object hold the ffmpeg status
+                    for each_status_line in tailer.follow(f):
+                        pure = each_status_line.strip().split('=')
+                        key, value = pure  # unpack the key value pair.
+                        status_dict[key] = value
+                        if key == 'progress':  # We hit the bottom line of ffmpeg report, periodically.
+                            self._report_progress(status_dict)
+                            status_dict = {}
 
-                flush_count = 11
-                for each_status_line in tailer.follow(f):
-                    pure = each_status_line.strip().split('=')
-                    key, value = pure  # unpack the key value pair.
-                    # if key not in status_dict or status_dict[key] is None:
-                    #    status_dict[key] = value
-                    self._report_progress(status_dict)
-                else:
-                    self._report_progress({'error': 'Progress File Is Empty'})
+                        if key == 'progress' and value == 'end':
+                            retry = -1
+                            status_dict = {}
+            except IOError:
+                self._report_progress({'report': 'Cannot Read Progress File. IOError.'})
+                time.sleep(0.1)  # Sleep 0.5 then retry
+                retry -= 1
 
-        except IOError:
-            return {'error': 'Cannot Read File. IOError.'}
+    def _hook_worker_status(self, messageobj):
+        ''' Hook the worker status into the message object '''
+        statusobj = {}
+        statusobj['ffmpeg_status'] = messageobj
+        statusobj['is_render'] = self.is_rendering()
+        statusobj['has_failed'] = self.has_failed()
+        if self.get_cake():
+            statusobj['cake_uid'] = self.get_cake().get('uid', None)
+        else:
+            statusobj['cake_uid'] = None
+
+        if self.cake and self.is_rendering() and 'error' not in self.status():
+            percent = int(messageobj['frame']) / \
+                (int(self.cake['range_end']) - int(self.cake['range_start']))
+            percent *= 100
+            percent = int(percent)
+            messageobj['percent'] = percent
+
+        return statusobj
 
     def status(self):
         ''' Show progress of ffmpeg rendering progress file. '''
@@ -172,15 +191,48 @@ class RenderWorker():
             render_command = bake.generate_cake_render_command(self.cake, resultfilename, self.codecname,
                                                                self.codecflag, self.ffmpeg, self.progressfilename)
             self._render(render_command)
-        except RenderProgressError as ex:
+        except RenderProgressError as ex:  # if somehow the render progress died.
             self.failed = True
-            raise ex
+            self._report_progress({'error': str(ex)})
         except:
             self.failed = True
             logger.error('Cake %s cannot be converted to a ffmpeg command' % cake['uid'])
+            self._report_progress({'error': 'Cake %s cannot be converted to a ffmpeg command' % cake['uid']})
             raise RenderCommandError('cake %s cannot be converted to a ffmpeg command' % cake['uid'])
         finally:
             self.cake = None  # unmount the cake
+
+    def concat(self, parts, resultfilename):
+        ''' Stupid concat function.
+            @parts: files
+            @resultfilename: result video file name.
+        '''
+        concat_command = bake.generate_concat_command(parts, resultfilename)
+        if concat_command:
+            try:
+                self.failed = False
+                self._render(concat_command)
+                self.failed = False
+                self._report_progress({'concated': resultfilename})
+            except RenderProgressError as ex:  # if somehow the render progress died.
+                self.failed = True
+                self._report_progress({'error': str(ex)})
+        else:
+            self._report_progress({'error': 'Cannot convert to ffmpeg concat command.'})
+
+    def trim(self, input_file_name, start_frame, end_frame, result_file_name, fps):
+        ''' Trim the input file into desired length '''
+        start_time = '%.2f' % (start_frame / fps)
+        end_time = '%.2f' % (end_frame / fps)
+        trim_command = bake.generate_trim_command(
+            input_file_name, start_time, end_time, result_file_name, self.codecname, self.codecflag)
+        try:
+            self.failed = False
+            self._render(trim_command)
+            self.failed = False
+        except RenderProgressError as ex:
+            self.failed = True
+            self._report_progress({'error': str(ex)})
 
     def clean_log(self):
         logger.info('Try to delete progress file name %s' % self.progressfilename)
